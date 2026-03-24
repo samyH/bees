@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body {
+                padding: 1.5cm;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            input,
+            textarea {
+                border: none !important;
+                padding: 0 !important;
+                background: transparent !important;
+                outline: none !important;
+                box-shadow: none !important;
+                appearance: none !important;
+            }
+
+            #invoice-container {
+                zoom: 0.96;
+                box-shadow: none;
+                border: none;
+            }
+        }
+
+        input,
+        textarea {
+            border-bottom: 1px dashed #ddd;
+            padding: 2px 4px;
+        }
+
+        input:focus {
+            border-bottom: 1px solid #165973;
+            outline: none;
+            background-color: #f9fafb;
+        }
+
+        /* Hide arrows on number inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-4 sm:p-10">
+
+    <div id="invoice-container"
+        class="max-w-4xl mx-auto bg-white p-8 sm:p-12 shadow-lg border-t-8 border-[#165973] print:p-0">
+
+        <div class="flex justify-between items-start mb-8 print:mb-6">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-800 uppercase tracking-tighter">Invoice</h1>
+                <p class="text-gray-500 mt-1 font-medium">Bees Painting & Decorating</p>
+
+                <div class="mt-4 text-xs text-gray-600 leading-relaxed">
+                    <p class="font-bold text-gray-800 text-sm">Bees Painting & Decorating Ltd</p>
+                    <p>16 Marmaduke Street</p>
+                    <p>Bristol, BS3 4SQ</p>
+                    <p>Phone: 07940 251720</p>
+                    <p>Email: beesdecorating@gmail.com</p>
+                </div>
+            </div>
+
+            <div
+                class="w-24 h-24 flex items-center justify-center overflow-hidden rounded bg-gray-50 border border-gray-100">
+                <img src="./bees-logo@2x.png" alt="Logo" class="max-w-full max-h-full object-contain">
+            </div>
+        </div>
+
+        <hr class="mb-6 border-gray-100">
+
+        <div class="grid grid-cols-2 gap-8 mb-8 print:mb-6">
+            <div>
+                <h3 class="text-[10px] uppercase text-gray-400 font-bold mb-1">Bill To:</h3>
+                <input type="text" placeholder="Client Name" class="font-bold text-gray-800 text-sm w-full mb-1">
+                <textarea placeholder="Client Address"
+                    class="text-gray-600 text-xs leading-5 w-full h-12 border-none"></textarea>
+            </div>
+            <div class="text-right text-xs space-y-2">
+                <p><span class="font-bold text-gray-800">Invoice #:</span> <input type="text" value="INV-101"
+                        class="w-20 text-right"></p>
+                <p><span class="font-bold text-gray-800">Date:</span> <input type="date" id="invoice-date"
+                        class="text-right"></p>
+                <p><span class="font-bold text-gray-800">Due Date:</span> <input type="date" id="due-date"
+                        class="text-right"></p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" id="items-table">
+                <thead>
+                    <tr
+                        class="bg-gray-50 text-gray-700 uppercase text-[10px] font-bold tracking-widest border-b border-gray-200">
+                        <th class="py-2 px-4">Work Description</th>
+                        <th class="py-2 px-4 w-20 text-center">Qty</th>
+                        <th class="py-2 px-4 w-28 text-right">Price (£)</th>
+                        <th class="py-2 px-4 w-28 text-right">Total (£)</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="text-gray-600 text-xs">
+                    <tr class="border-b border-gray-50 line-item">
+                        <td class="py-3 px-4"><input type="text" placeholder="Description..." class="w-full"></td>
+                        <td class="py-3 px-4 text-center"><input type="number" class="qty w-12 text-center" value="1">
+                        </td>
+                        <td class="py-3 px-4 text-right"><input type="number" class="price w-20 text-right"
+                                value="0.00"></td>
+                        <td class="py-3 px-4 text-right font-semibold row-total">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button onclick="addRow()"
+            class="no-print mt-4 w-full py-2 border-2 border-dashed border-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest hover:border-[#165973] hover:text-[#165973] transition-colors">
+            ＋ Add Line Item
+        </button>
+
+        <div class="flex justify-end mt-8 mb-8 print:mt-4 print:mb-4">
+            <div class="w-56 text-sm">
+                <div class="flex justify-between py-1 text-gray-600">
+                    <span>Subtotal</span>
+                    <span id="subtotal">£0.00</span>
+                </div>
+                <div class="flex justify-between py-2 border-t border-gray-200 mt-2 text-lg font-bold text-gray-900">
+                    <span>Total</span>
+                    <span id="grand-total">£0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded border border-gray-100 mb-6">
+            <h4 class="font-bold text-gray-800 text-xs mb-2 uppercase tracking-wide">Payment Information</h4>
+            <div class="grid grid-cols-2 text-[11px] text-gray-600 gap-y-1">
+                <p><span class="font-semibold text-gray-800 text-[10px] mr-1">BANK:</span> Starling Bank</p>
+                <p><span class="font-semibold text-gray-800 text-[10px] mr-1">NAME:</span> D C McDermott</p>
+                <p><span class="font-semibold text-gray-800 text-[10px] mr-1">ACC NO:</span> 70153660</p>
+                <p><span class="font-semibold text-gray-800 text-[10px] mr-1">SORT:</span> 30-84-75</p>
+            </div>
+        </div>
+
+        <div class="text-center text-[10px] text-gray-400 italic">
+            "Busy as a bee to get your home looking its best!"
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto mt-6 flex justify-center gap-4 no-print">
+        <button onclick="window.print()"
+            class="bg-yellow-500 text-white font-bold px-10 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition-all transform hover:scale-105">
+            Download PDF
+        </button>
+    </div>
+
+    <script>
+        // Set dates on load
+        const today = new Date();
+        document.getElementById('invoice-date').valueAsDate = today;
+
+        // Set due date to 14 days from now
+        const dueDate = new Date();
+        dueDate.setDate(today.getDate() + 14);
+        document.getElementById('due-date').valueAsDate = dueDate;
+
+        // Auto-Calculation Logic
+        const calculateInvoice = () => {
+            let grandTotal = 0;
+            const rows = document.querySelectorAll('.line-item');
+
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                const total = qty * price;
+
+                row.querySelector('.row-total').innerText = total.toFixed(2);
+                grandTotal += total;
+            });
+
+            document.getElementById('subtotal').innerText = '£' + grandTotal.toFixed(2);
+            document.getElementById('grand-total').innerText = '£' + grandTotal.toFixed(2);
+        };
+
+        // Add Row Function
+        const addRow = () => {
+            const tbody = document.getElementById('table-body');
+            const newRow = document.createElement('tr');
+            newRow.className = "border-b border-gray-50 line-item";
+            newRow.innerHTML = `
+                <td class="py-3 px-4"><input type="text" placeholder="Description..." class="w-full"></td>
+                <td class="py-3 px-4 text-center"><input type="number" class="qty w-12 text-center" value="1"></td>
+                <td class="py-3 px-4 text-right"><input type="number" class="price w-20 text-right" value="0.00"></td>
+                <td class="py-3 px-4 text-right font-semibold row-total">0.00</td>
+            `;
+            tbody.appendChild(newRow);
+        };
+
+        // Event Delegation for input changes
+        document.getElementById('items-table').addEventListener('input', calculateInvoice);
+    </script>
+
+</body>
+
+</html>
