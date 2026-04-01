@@ -82,8 +82,7 @@
                 </div>
             </div>
 
-            <div
-                class="w-24 h-24 flex items-center justify-center overflow-hidden rounded bg-gray-50 border border-gray-100">
+            <div class="w-24 h-24 flex items-center justify-center overflow-hidden">
                 <img src="./bees-logo@2x.png" alt="Logo" class="max-w-full max-h-full object-contain">
             </div>
         </div>
@@ -93,13 +92,14 @@
         <div class="grid grid-cols-2 gap-8 mb-8 print:mb-6">
             <div>
                 <h3 class="text-[10px] uppercase text-gray-400 font-bold mb-1">Bill To:</h3>
-                <input type="text" placeholder="Client Name" class="font-bold text-gray-800 text-sm w-full mb-1">
-                <textarea placeholder="Client Address"
+                <input id="client-name" type="text" placeholder="Client Name"
+                    class="font-bold text-gray-800 text-sm w-full mb-1">
+                <textarea id="client-address" placeholder="Client Address"
                     class="text-gray-600 text-xs leading-5 w-full h-12 border-none"></textarea>
             </div>
             <div class="text-right text-xs space-y-2">
-                <p><span class="font-bold text-gray-800">Invoice #:</span> <input type="text" value="INV-101"
-                        class="w-20 text-right"></p>
+                <p><span class="font-bold text-gray-800">Invoice #:</span> <input id="invoice-num" type="text"
+                        placeholder="INV-101" class="w-20 text-right"></p>
                 <p><span class="font-bold text-gray-800">Date:</span> <input type="date" id="invoice-date"
                         class="text-right"></p>
                 <p><span class="font-bold text-gray-800">Due Date:</span> <input type="date" id="due-date"
@@ -152,7 +152,7 @@
         <div class="p-4 bg-gray-50 rounded border border-gray-100 mb-6">
             <h4 class="font-bold text-gray-800 text-xs mb-2 uppercase tracking-wide">Payment Information</h4>
             <div class="grid grid-cols-2 text-[11px] text-gray-600 gap-y-1">
-                <p><span class="font-semibold text-gray-800 text-[10px] mr-1">BANK:</span> Starling Bank</p>
+                <p><span class="font-semibold text-gray-800 text-[10px] mr-1">BANK:</span> Lloyds</p>
                 <p><span class="font-semibold text-gray-800 text-[10px] mr-1">NAME:</span> D C McDermott</p>
                 <p><span class="font-semibold text-gray-800 text-[10px] mr-1">ACC NO:</span> 70153660</p>
                 <p><span class="font-semibold text-gray-800 text-[10px] mr-1">SORT:</span> 30-84-75</p>
@@ -165,7 +165,7 @@
     </div>
 
     <div class="max-w-4xl mx-auto mt-6 flex justify-center gap-4 no-print">
-        <button onclick="window.print()"
+        <button onclick="downloadInvoice()"
             class="bg-yellow-500 text-white font-bold px-10 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition-all transform hover:scale-105">
             Download PDF
         </button>
@@ -215,6 +215,40 @@
 
         // Event Delegation for input changes
         document.getElementById('items-table').addEventListener('input', calculateInvoice);
+
+        function downloadInvoice() {
+            // 1. Grab values from the input fields
+            const clientNameInput = document.getElementById('client-name').value;
+            const clientAddressInput = document.getElementById('client-address').value;
+            const invoiceNumInput = document.getElementById('invoice-num').value;
+
+            // 2. Generate today's date (DD-MM-YYYY)
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const year = today.getFullYear();
+            const formattedDate = `${day}-${month}-${year}`;
+
+            // 3. Clean up the names (removes spaces and weird characters)
+            const clientName = clientNameInput ? clientNameInput.trim().replace(/\s+/g, '-') : 'client';
+            const clientAddress = clientAddressInput ? clientAddressInput.trim().replace(/\s+/g, '-') : 'address';
+            const invoiceNum = invoiceNumInput || '000';
+
+            // 4. Construct the final filename
+            const fileName = `${clientName}-${clientAddress}-invoice#${invoiceNum}-${formattedDate}`;
+
+            // 5. The Title Swap Trick
+            const originalTitle = document.title;
+            document.title = fileName;
+
+            // 6. Trigger the print dialog
+            window.print();
+
+            // 7. Restore the original page title
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 100);
+        }
     </script>
 
 </body>
