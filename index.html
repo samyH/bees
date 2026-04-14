@@ -218,38 +218,43 @@
         document.getElementById('items-table').addEventListener('input', calculateInvoice);
 
         function downloadInvoice() {
-            // 1. Grab values from the input fields
-            const clientNameInput = document.getElementById('client-name').value;
-            const clientAddressInput = document.getElementById('client-address').value;
-            const invoiceNumInput = document.getElementById('invoice-num').value;
+    // 1. Grab values
+    const clientNameInput = document.getElementById('client-name').value;
+    const clientAddressInput = document.getElementById('client-address').value;
+    const invoiceNumInput = document.getElementById('invoice-num').value;
 
-            // 2. Generate today's date (DD-MM-YYYY)
-            const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-            const year = today.getFullYear();
-            const formattedDate = `${day}-${month}-${year}`;
+    // 2. Generate date
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
 
-            // 3. Clean up the names (removes spaces and weird characters)
-            const clientName = clientNameInput ? clientNameInput.trim().replace(/\s+/g, '-') : 'client';
-            const clientAddress = clientAddressInput ? clientAddressInput.trim().replace(/\s+/g, '-') : 'address';
-            const invoiceNum = invoiceNumInput || '000';
+    // 3. Clean up (Notice: removed the '#' character)
+    const clientName = clientNameInput ? clientNameInput.trim().replace(/\s+/g, '-') : 'client';
+    const clientAddress = clientAddressInput ? clientAddressInput.trim().replace(/\s+/g, '-') : 'address';
+    const invoiceNum = invoiceNumInput || '000';
 
-            // 4. Construct the final filename
-            const fileName = `${clientName}-${clientAddress}-invoice#${invoiceNum}-${formattedDate}`;
+    // 4. Construct Name - Using a dash instead of #
+    const fileName = `${clientName}-${clientAddress}-invoice-no-${invoiceNum}-${formattedDate}`;
 
-            // 5. The Title Swap Trick
-            const originalTitle = document.title;
-            document.title = fileName;
+    // 5. The Swap with a "Breath"
+    const originalTitle = document.title;
+    document.title = fileName;
 
-            // 6. Trigger the print dialog
-            window.print();
-
-            // 7. Restore the original page title
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 100);
-        }
+    // We use a tiny timeout to ensure the browser UI updates the title 
+    // before the print dialog freezes the main thread.
+    setTimeout(() => {
+        window.print();
+        
+        // 6. Use the proper event to restore the title
+        // This fires after the user closes the print dialog
+        window.onafterprint = () => {
+            document.title = originalTitle;
+            window.onafterprint = null; // Clean up
+        };
+    }, 50); 
+}
     </script>
 
 </body>
