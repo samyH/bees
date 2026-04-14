@@ -218,43 +218,39 @@
         document.getElementById('items-table').addEventListener('input', calculateInvoice);
 
         function downloadInvoice() {
-    // 1. Grab values
-    const clientNameInput = document.getElementById('client-name').value;
-    const clientAddressInput = document.getElementById('client-address').value;
-    const invoiceNumInput = document.getElementById('invoice-num').value;
+            const clientNameInput = document.getElementById('client-name').value;
+            const clientAddressInput = document.getElementById('client-address').value;
+            const invoiceNumInput = document.getElementById('invoice-num').value;
 
-    // 2. Generate date
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const formattedDate = `${day}-${month}-${year}`;
+            const today = new Date();
+            const formattedDate = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
 
-    // 3. Clean up (Notice: removed the '#' character)
-    const clientName = clientNameInput ? clientNameInput.trim().replace(/\s+/g, '-') : 'client';
-    const clientAddress = clientAddressInput ? clientAddressInput.trim().replace(/\s+/g, '-') : 'address';
-    const invoiceNum = invoiceNumInput || '000';
+            // IMPORTANT: Absolutely no '#' or special characters. Mobile OS filesystems hate them.
+            const clientName = clientNameInput ? clientNameInput.trim().replace(/\s+/g, '-') : 'client';
+            const clientAddress = clientAddressInput ? clientAddressInput.trim().replace(/\s+/g, '-') : 'address';
+            const invoiceNum = invoiceNumInput.replace(/[^a-z0-9]/gi, '') || '000'; // Strip all non-alphanumeric
 
-    // 4. Construct Name - Using a dash instead of #
-    const fileName = `${clientName}-${clientAddress}-invoice-no-${invoiceNum}-${formattedDate}`;
+            const fileName = `${clientName}-${clientAddress}-invoice-no-${invoiceNum}-${formattedDate}`;
 
-    // 5. The Swap with a "Breath"
-    const originalTitle = document.title;
-    document.title = fileName;
+            const originalTitle = document.title;
+    
+            // Update BOTH the property and the DOM element
+            document.title = fileName;
+            const titleTag = document.querySelector('title');
+            if (titleTag) titleTag.innerText = fileName;
 
-    // We use a tiny timeout to ensure the browser UI updates the title 
-    // before the print dialog freezes the main thread.
-    setTimeout(() => {
-        window.print();
+                // Give mobile browsers a significantly longer "breather" (300ms - 500ms)
+                // This allows the OS to register the title change before the print UI pops up.
+                setTimeout(() => {
+                    window.print();
         
-        // 6. Use the proper event to restore the title
-        // This fires after the user closes the print dialog
-        window.onafterprint = () => {
-            document.title = originalTitle;
-            window.onafterprint = null; // Clean up
-        };
-    }, 50); 
-}
+                    // Use the proper listener to reset the title
+                    window.onafterprint = () => {
+                    document.title = originalTitle;
+                    if (titleTag) titleTag.innerText = originalTitle;
+                };
+            }, 500); 
+        }
     </script>
 
 </body>
