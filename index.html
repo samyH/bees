@@ -232,24 +232,41 @@
 
             const fileName = `${clientName}-${clientAddress}-invoice-no-${invoiceNum}-${formattedDate}`;
 
-            const originalTitle = document.title;
-    
-            // Update BOTH the property and the DOM element
-            document.title = fileName;
-            const titleTag = document.querySelector('title');
-            if (titleTag) titleTag.innerText = fileName;
+            // 1. Create a hidden iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
 
-                // Give mobile browsers a significantly longer "breather" (300ms - 500ms)
-                // This allows the OS to register the title change before the print UI pops up.
-                setTimeout(() => {
-                    window.print();
-        
-                    // Use the proper listener to reset the title
-                    window.onafterprint = () => {
-                    document.title = originalTitle;
-                    if (titleTag) titleTag.innerText = originalTitle;
-                };
-            }, 500); 
+            // 2. Build the content for the iframe
+            const content = `
+                <html>
+                    <head>
+                        <title>${fileName}</title>
+                        <link rel="stylesheet" href="your-style.css"> </head>
+                    <body>
+                        ${document.getElementById('invoice-container').innerHTML}
+                    </body>
+                </html>
+            `;
+
+            // 3. Write content and print
+            const pri = iframe.contentWindow;
+            pri.document.open();
+            pri.document.write(content);
+            pri.document.close();
+
+            // Wait for images/styles to load in the iframe, then print
+            iframe.onload = function() {
+                pri.focus();
+                pri.print();
+                // 4. Clean up after a delay
+                setTimeout(() => document.body.removeChild(iframe), 1000);
+            };
         }
     </script>
 
