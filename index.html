@@ -218,55 +218,37 @@
         document.getElementById('items-table').addEventListener('input', calculateInvoice);
 
         function downloadInvoice() {
+            // 1. Grab values from the input fields
             const clientNameInput = document.getElementById('client-name').value;
             const clientAddressInput = document.getElementById('client-address').value;
             const invoiceNumInput = document.getElementById('invoice-num').value;
 
+            // 2. Generate today's date (DD-MM-YYYY)
             const today = new Date();
-            const formattedDate = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const year = today.getFullYear();
+            const formattedDate = `${day}-${month}-${year}`;
 
-            // IMPORTANT: Absolutely no '#' or special characters. Mobile OS filesystems hate them.
+            // 3. Clean up the names (removes spaces and weird characters)
             const clientName = clientNameInput ? clientNameInput.trim().replace(/\s+/g, '-') : 'client';
             const clientAddress = clientAddressInput ? clientAddressInput.trim().replace(/\s+/g, '-') : 'address';
-            const invoiceNum = invoiceNumInput.replace(/[^a-z0-9]/gi, '') || '000'; // Strip all non-alphanumeric
+            const invoiceNum = invoiceNumInput || '000';
 
-            const fileName = `${clientName}-${clientAddress}-invoice-no-${invoiceNum}-${formattedDate}`;
+            // 4. Construct the final filename
+            const fileName = `${clientName}-${clientAddress}-invoice#${invoiceNum}-${formattedDate}`;
 
-            // 1. Create a hidden iframe
-            const iframe = document.createElement('iframe');
-            iframe.style.position = 'fixed';
-            iframe.style.right = '0';
-            iframe.style.bottom = '0';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = '0';
-            document.body.appendChild(iframe);
+            // 5. The Title Swap Trick
+            const originalTitle = document.title;
+            document.title = fileName;
 
-            // 2. Build the content for the iframe
-            const content = `
-                <html>
-                    <head>
-                        <title>${fileName}</title>
-                        <link rel="stylesheet" href="your-style.css"> </head>
-                    <body>
-                        ${document.getElementById('invoice-container').innerHTML}
-                    </body>
-                </html>
-            `;
+            // 6. Trigger the print dialog
+            window.print();
 
-            // 3. Write content and print
-            const pri = iframe.contentWindow;
-            pri.document.open();
-            pri.document.write(content);
-            pri.document.close();
-
-            // Wait for images/styles to load in the iframe, then print
-            iframe.onload = function() {
-                pri.focus();
-                pri.print();
-                // 4. Clean up after a delay
-                setTimeout(() => document.body.removeChild(iframe), 1000);
-            };
+            // 7. Restore the original page title
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 100);
         }
     </script>
 
